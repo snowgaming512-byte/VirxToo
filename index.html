@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sorry 💗 — KISHAR CODEX</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --card-bg: #12121a;
+  --card-border: rgba(255,255,255,0.07);
+  --white: #fff;
+  --muted: rgba(255,255,255,0.5);
+  --pink: #ff3d8b;
+  --pink-glow: rgba(255,61,139,0.25);
+  --blue: #4f8cff;
+  --blue-glow: rgba(79,140,255,0.2);
+  --teal: #00e5c4;
+  --teal-glow: rgba(0,229,196,0.2);
+  --amber: #ffb347;
+  --amber-glow: rgba(255,179,71,0.2);
+  --purple: #a259ff;
+  --purple-glow: rgba(162,89,255,0.2);
+  --green: #3ddc84;
+  --green-glow: rgba(61,220,132,0.2);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+}
+
+/* ─── CANVAS ─── */
+#bg-canvas { position: fixed; inset: 0; z-index: 0; }
+
+/* ─── PAGES ─── */
+.page {
+  position: fixed; inset: 0; z-index: 5;
+  overflow-y: auto; overflow-x: hidden;
+  opacity: 0; pointer-events: none;
+  transform: translateY(40px) scale(0.97);
+  transition: opacity 0.5s cubic-bezier(.22,1,.36,1), transform 0.5s cubic-bezier(.22,1,.36,1);
+  padding: 0 0 6vh;
+}
+.page.active { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+.page.out { opacity: 0; transform: translateY(-30px) scale(0.97); transition: opacity 0.3s, transform 0.3s; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 10px;
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 0.5px solid var(--card-border);
+}
+.brand-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+  color: var(--pink); text-transform: uppercase; text-decoration: none;
+  background: rgba(255,61,139,0.1); border: 1px solid rgba(255,61,139,0.25);
+  padding: 5px 10px; border-radius: 20px;
+}
+.page-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.step-badge {
+  font-size: 11px; font-weight: 600;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 20px; padding: 4px 10px; color: var(--muted);
+}
+
+/* ─── SECTION HEADERS ─── */
+.section-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px; margin-bottom: 8px;
+}
+.tag-pink  { background: rgba(255,61,139,0.12); color: var(--pink);   border: 1px solid rgba(255,61,139,0.25); }
+.tag-blue  { background: rgba(79,140,255,0.12); color: var(--blue);   border: 1px solid rgba(79,140,255,0.25); }
+.tag-teal  { background: rgba(0,229,196,0.12);  color: var(--teal);   border: 1px solid rgba(0,229,196,0.25); }
+.tag-amber { background: rgba(255,179,71,0.12); color: var(--amber);  border: 1px solid rgba(255,179,71,0.25); }
+.tag-purple{ background: rgba(162,89,255,0.12); color: var(--purple); border: 1px solid rgba(162,89,255,0.25); }
+.tag-green { background: rgba(61,220,132,0.12); color: var(--green);  border: 1px solid rgba(61,220,132,0.25); }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--card-bg);
+  border: 0.5px solid var(--card-border);
+  border-radius: 18px;
+  padding: 18px;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: var(--card-shine, transparent); pointer-events: none;
+}
+.card-pink   { --card-shine: linear-gradient(135deg, rgba(255,61,139,0.06) 0%, transparent 60%); border-color: rgba(255,61,139,0.15); }
+.card-blue   { --card-shine: linear-gradient(135deg, rgba(79,140,255,0.06) 0%, transparent 60%); border-color: rgba(79,140,255,0.15); }
+.card-teal   { --card-shine: linear-gradient(135deg, rgba(0,229,196,0.06) 0%, transparent 60%); border-color: rgba(0,229,196,0.15); }
+.card-amber  { --card-shine: linear-gradient(135deg, rgba(255,179,71,0.07) 0%, transparent 60%); border-color: rgba(255,179,71,0.15); }
+.card-purple { --card-shine: linear-gradient(135deg, rgba(162,89,255,0.07) 0%, transparent 60%); border-color: rgba(162,89,255,0.15); }
+.card-green  { --card-shine: linear-gradient(135deg, rgba(61,220,132,0.06) 0%, transparent 60%); border-color: rgba(61,220,132,0.15); }
+
+/* ─── STAT CARDS ─── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-card {
+  background: var(--card-bg); border: 0.5px solid var(--card-border);
+  border-radius: 14px; padding: 14px 14px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
+.stat-sub   { font-size: 11px; color: var(--muted); }
+
+/* ─── TIMELINE ─── */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item { display: flex; gap: 12px; padding: 0 0 20px; position: relative; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot-col { display: flex; flex-direction: column; align-items: center; width: 28px; flex-shrink: 0; }
+.tl-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.tl-line { flex: 1; width: 2px; background: var(--card-border); margin-top: 4px; }
+.tl-item:last-child .tl-line { display: none; }
+.tl-content { flex: 1; padding-top: 4px; }
+.tl-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.tl-text  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.tl-time  { font-size: 10px; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
+
+/* ─── PROGRESS BARS ─── */
+.prog-list { display: flex; flex-direction: column; gap: 12px; }
+.prog-item {}
+.prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.prog-label { font-size: 12px; font-weight: 500; }
+.prog-pct   { font-size: 12px; font-weight: 600; }
+.prog-track { height: 7px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 10px; transition: width 1.4s cubic-bezier(.22,1,.36,1); width: 0; }
+
+/* ─── QUOTE CARD ─── */
+.quote-card {
+  border-left: 3px solid; padding: 14px 16px; border-radius: 0 14px 14px 0;
+  background: var(--card-bg); font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 15px; line-height: 1.7;
+}
+.quote-attr { font-family: 'Space Grotesk', sans-serif; font-style: normal; font-size: 11px; color: var(--muted); margin-top: 8px; letter-spacing: 1px; }
+
+/* ─── REASONS GRID ─── */
+.reason-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.reason-pill {
+  border-radius: 12px; padding: 12px 10px; text-align: center;
+  font-size: 11px; font-weight: 500; line-height: 1.4;
+  border: 0.5px solid; display: flex; flex-direction: column; gap: 6px; align-items: center;
+}
+.reason-emoji { font-size: 22px; }
+
+/* ─── PROMISE LIST ─── */
+.promise-list { display: flex; flex-direction: column; gap: 8px; }
+.promise-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--card-bg); border: 0.5px solid var(--card-border);
+  border-radius: 12px; padding: 12px 14px;
+}
+.promise-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.promise-text {}
+.promise-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.promise-desc  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ─── MOOD METER ─── */
+.mood-meter {
+  display: flex; align-items: center; gap: 0;
+  background: rgba(255,255,255,0.05); border-radius: 50px; overflow: hidden;
+  border: 0.5px solid var(--card-border);
+}
+.mood-step {
+  flex: 1; text-align: center; padding: 10px 0; font-size: 18px;
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+  border-right: 0.5px solid var(--card-border);
+}
+.mood-step:last-child { border-right: none; }
+.mood-step:hover { background: rgba(255,255,255,0.08); transform: scale(1.2); }
+.mood-step.picked { background: rgba(255,61,139,0.15); }
+.mood-label { font-size: 11px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+/* ─── BUTTONS ─── */
+.btn-row { display: flex; gap: 10px; }
+.btn {
+  flex: 1; padding: 14px 16px; border: none; border-radius: 50px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; letter-spacing: 0.3px;
+  transition: transform 0.18s, filter 0.18s;
+  position: relative; overflow: hidden;
+}
+.btn:active { transform: scale(0.96); }
+.btn-pink   { background: var(--pink);   color: #fff;  box-shadow: 0 4px 24px var(--pink-glow); }
+.btn-blue   { background: var(--blue);   color: #fff;  box-shadow: 0 4px 24px var(--blue-glow); }
+.btn-teal   { background: var(--teal);   color: #0a0a0f; box-shadow: 0 4px 24px var(--teal-glow); }
+.btn-amber  { background: var(--amber);  color: #0a0a0f; box-shadow: 0 4px 24px var(--amber-glow); }
+.btn-purple { background: var(--purple); color: #fff;  box-shadow: 0 4px 24px var(--purple-glow); }
+.btn-green  { background: var(--green);  color: #0a0a0f; box-shadow: 0 4px 24px var(--green-glow); }
+.btn-ghost  { background: transparent; color: var(--muted); border: 0.5px solid var(--card-border); }
+.btn:hover  { filter: brightness(1.1); }
+.btn-full   { width: 100%; display: block; text-align: center; }
+
+/* ─── UTILS ─── */
+.px { padding-left: 16px; padding-right: 16px; }
+.mt8  { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mt16 { margin-top: 16px; }
+.mt20 { margin-top: 20px; }
+.mt24 { margin-top: 24px; }
+.h1 { font-family: 'Playfair Display', serif; font-size: clamp(26px, 6vw, 38px); font-weight: 700; line-height: 1.15; }
+.h2 { font-size: 16px; font-weight: 700; }
+.h3 { font-size: 14px; font-weight: 600; }
+.body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.center { text-align: center; }
+
+/* ─── HERO EMOJI ─── */
+.hero-emoji { font-size: 64px; display: block; text-align: center; line-height: 1; animation: heroPulse 2s ease-in-out infinite; }
+@keyframes heroPulse { 0%,100%{transform:scale(1) rotate(-3deg);} 50%{transform:scale(1.12) rotate(3deg);} }
+
+/* ─── FLOATING BITS ─── */
+#float-layer { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.float-bit { position: absolute; bottom: -40px; font-size: 18px; animation: floatUp linear infinite; opacity: 0; }
+@keyframes floatUp { 0%{transform:translateY(0) rotate(0deg);opacity:0;} 10%{opacity:0.7;} 90%{opacity:0.2;} 100%{transform:translateY(-110vh) rotate(360deg);opacity:0;} }
+
+/* ─── NOTIFICATION ─── */
+.notif {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--card-bg); border: 0.5px solid var(--card-border);
+  border-radius: 50px; padding: 8px 18px; font-size: 12px; font-weight: 500;
+  z-index: 100; opacity: 0; transition: all 0.35s;
+  white-space: nowrap; backdrop-filter: blur(10px);
+}
+.notif.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── MUSIC BAR ─── */
+.music-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card-bg); border: 0.5px solid var(--card-border);
+  border-radius: 50px; padding: 10px 14px;
+}
+.music-bars { display: flex; align-items: flex-end; gap: 2px; height: 18px; }
+.music-bars span {
+  width: 3px; background: var(--pink); border-radius: 2px;
+  animation: musicBar 0.8s ease-in-out infinite alternate;
+}
+.music-bars span:nth-child(1){height:8px; animation-delay:0s;}
+.music-bars span:nth-child(2){height:15px; animation-delay:0.15s;}
+.music-bars span:nth-child(3){height:10px; animation-delay:0.3s;}
+.music-bars span:nth-child(4){height:18px; animation-delay:0.45s;}
+.music-bars span:nth-child(5){height:6px; animation-delay:0.6s;}
+@keyframes musicBar { from{transform:scaleY(0.3);} to{transform:scaleY(1);} }
+.music-title { font-size: 12px; font-weight: 500; }
+.music-sub   { font-size: 10px; color: var(--muted); }
+
+/* ─── GLOW ORBS ─── */
+.orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(60px); animation: orbFloat ease-in-out infinite alternate; }
+@keyframes orbFloat { from{transform:translate(0,0);} to{transform:translate(15px,20px);} }
+
+/* ─── CHECKLIST ─── */
+.checklist { display: flex; flex-direction: column; gap: 8px; }
+.check-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.check-box {
+  width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; border: 1.5px solid; cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.check-box:hover { transform: scale(1.1); }
+.check-box.done { color: #0a0a0f; border-color: transparent; }
+
+/* ─── HEART RATE ─── */
+.heartrate { width: 100%; height: 50px; }
+
+/* ─── SCROLL HINT ─── */
+.scroll-hint { text-align: center; font-size: 10px; color: var(--muted); padding: 10px 0 4px; letter-spacing: 1px; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+
+/* ─── FINAL CONFETTI ─── */
+.confetti-piece { position: fixed; width: 8px; height: 8px; top: -10px; border-radius: 2px; animation: confettiFall linear forwards; z-index: 50; pointer-events: none; }
+@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1;} 100%{transform:translateY(110vh) rotate(720deg);opacity:0;} }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="orb" style="width:300px;height:300px;background:rgba(255,61,139,0.18);top:-80px;left:-80px;animation-duration:6s;"></div>
+<div class="orb" style="width:250px;height:250px;background:rgba(79,140,255,0.14);bottom:-60px;right:-60px;animation-duration:8s;"></div>
+<div class="orb" style="width:180px;height:180px;background:rgba(162,89,255,0.12);top:40%;left:30%;animation-duration:5s;"></div>
+<div id="float-layer"></div>
+<div class="notif" id="notif"></div>
+
+<!-- ══════════════════════════════
+     PAGE 1 — INTRO / SORRY
+══════════════════════════════ -->
+<div class="page active" id="p1">
+  <div class="topbar px">
+    <a class="brand-tag" href="https://t.me/KISHAR05" target="_blank">KISHAR CODEX</a>
+    <span class="step-badge">1 / 6</span>
+  </div>
+
+  <div class="px mt20 center">
+    <span class="hero-emoji">💗</span>
+    <div class="mt12">
+      <span class="section-tag tag-pink">● Apology</span>
+    </div>
+    <h1 class="h1 mt8">I'm Really<br><em style="color:var(--pink)">Sorry.</em></h1>
+    <p class="body mt12">Mujhse galti ho gayi. Yeh page ek choti si koshish hai yeh batane ki ki tum mere liye kitne important ho — aur main kitna maafi chahta hoon.</p>
+  </div>
+
+  <div class="px mt20">
+    <div class="music-bar">
+      <div class="music-bars"><span></span><span></span><span></span><span></span><span></span></div>
+      <div>
+        <div class="music-title">Tum Hi Ho</div>
+        <div class="music-sub">Arijit Singh • Playing for you 🎵</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px mt16 stat-grid">
+    <div class="stat-card" style="border-color:rgba(255,61,139,0.2)">
+      <span class="stat-label">Sorry Count</span>
+      <span class="stat-value" style="color:var(--pink)">∞</span>
+      <span class="stat-sub">Times dil se</span>
+    </div>
+    <div class="stat-card" style="border-color:rgba(79,140,255,0.2)">
+      <span class="stat-label">You Matter</span>
+      <span class="stat-value" style="color:var(--blue)">100%</span>
+      <span class="stat-sub">Always & forever</span>
+    </div>
+    <div class="stat-card" style="border-color:rgba(0,229,196,0.2)">
+      <span class="stat-label">Regret Level</span>
+      <span class="stat-value" style="color:var(--teal)">MAX</span>
+      <span class="stat-sub">Sachchi feeling</span>
+    </div>
+    <div class="stat-card" style="border-color:rgba(255,179,71,0.2)">
+      <span class="stat-label">Love Intact</span>
+      <span class="stat-value" style="color:var(--amber)">9.9</span>
+      <span class="stat-sub">Out of 10 ✨</span>
+    </div>
+  </div>
+
+  <div class="px mt16">
+    <div class="quote-card" style="border-color:var(--pink)">
+      "Tum waqai bahut special ho mere liye. Yeh galti meri thi — aur main isse sudharna chahta hoon."
+      <div class="quote-attr">— Dil ki baat 🌸</div>
+    </div>
+  </div>
+
+  <div class="px mt20 btn-row">
+    <button class="btn btn-ghost" onclick="showPage(5)">Skip to End</button>
+    <button class="btn btn-pink" onclick="showPage(1)">Next →</button>
+  </div>
+  <div class="scroll-hint mt12">↓ scroll to read more</div>
+
+  <div class="px mt16 body" style="padding-bottom:30px;">
+    Kabhi kabhi hum woh cheezein nahi kar paate jo karna chahte hain — ya woh bol dete hain jo bolna nahi chahte tha. Par yeh page ek reminder hai: tum mere liye sirf ek insaan nahi ho, tum meri duniya ka ek hissa ho. 🌍
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE 2 — REASONS (WHY SORRY)
+══════════════════════════════ -->
+<div class="page" id="p2">
+  <div class="topbar px">
+    <a class="brand-tag" href="https://t.me/KISHAR05" target="_blank">KISHAR CODEX</a>
+    <span class="step-badge">2 / 6</span>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-blue">● Why I'm Sorry</span>
+    <h1 class="h1 mt8">Kyun Maafi<br><em style="color:var(--blue)">Maang Raha Hoon</em></h1>
+    <p class="body mt8">Yeh sab cheezein jo mujhe realize hue hain — honestly:</p>
+  </div>
+
+  <div class="px mt16 reason-grid">
+    <div class="reason-pill" style="background:rgba(255,61,139,0.08);border-color:rgba(255,61,139,0.2);color:var(--pink)">
+      <span class="reason-emoji">😔</span>Tumhara dil dukha — meri galti se
+    </div>
+    <div class="reason-pill" style="background:rgba(79,140,255,0.08);border-color:rgba(79,140,255,0.2);color:var(--blue)">
+      <span class="reason-emoji">🗣️</span>Jo bolna chahiye tha — woh nahi bola
+    </div>
+    <div class="reason-pill" style="background:rgba(0,229,196,0.08);border-color:rgba(0,229,196,0.2);color:var(--teal)">
+      <span class="reason-emoji">🧠</span>Bina soche action liya — galat tha
+    </div>
+    <div class="reason-pill" style="background:rgba(255,179,71,0.08);border-color:rgba(255,179,71,0.2);color:var(--amber)">
+      <span class="reason-emoji">⏰</span>Waqt par nahi samjha — late ho gaya
+    </div>
+    <div class="reason-pill" style="background:rgba(162,89,255,0.08);border-color:rgba(162,89,255,0.2);color:var(--purple)">
+      <span class="reason-emoji">💔</span>Tumhari feelings ko ignore kiya
+    </div>
+    <div class="reason-pill" style="background:rgba(61,220,132,0.08);border-color:rgba(61,220,132,0.2);color:var(--green)">
+      <span class="reason-emoji">🙈</span>Galat priority set kiya
+    </div>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-teal">● Feeling-O-Meter</span>
+    <p class="body mt8">Aaj mujhe kaisa lag raha hai — honestly:</p>
+    <div class="mt12 prog-list" id="feeling-prog">
+      <div class="prog-item">
+        <div class="prog-header"><span class="prog-label">Guilt</span><span class="prog-pct" style="color:var(--pink)">92%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="background:var(--pink)" data-w="92"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span class="prog-label">Miss Karna Tujhe</span><span class="prog-pct" style="color:var(--blue)">97%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="background:var(--blue)" data-w="97"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span class="prog-label">Want to Fix It</span><span class="prog-pct" style="color:var(--teal)">100%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="background:var(--teal)" data-w="100"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span class="prog-label">Love For You</span><span class="prog-pct" style="color:var(--amber)">999%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="background:var(--amber)" data-w="100"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px mt20 btn-row">
+    <button class="btn btn-ghost" onclick="showPage(0)">← Back</button>
+    <button class="btn btn-blue" onclick="showPage(2)">Next →</button>
+  </div>
+  <div style="height:30px;"></div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE 3 — TIMELINE / STORY
+══════════════════════════════ -->
+<div class="page" id="p3">
+  <div class="topbar px">
+    <a class="brand-tag" href="https://t.me/KISHAR05" target="_blank">KISHAR CODEX</a>
+    <span class="step-badge">3 / 6</span>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-teal">● Timeline</span>
+    <h1 class="h1 mt8">Humari<br><em style="color:var(--teal)">Story</em></h1>
+    <p class="body mt8">Jo moments mujhe yaad hain — ek ek karke:</p>
+  </div>
+
+  <div class="px mt20 timeline">
+    <div class="tl-item">
+      <div class="tl-dot-col">
+        <div class="tl-dot" style="background:rgba(255,61,139,0.15)">🌸</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Jab Pehli Baar Mila</div>
+        <div class="tl-text">Sab kuch normal laga tha — par kuch special bhi tha. Pata nahi kyun, par yaad raha.</div>
+        <div class="tl-time" style="color:var(--pink)">The Beginning ✨</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot-col">
+        <div class="tl-dot" style="background:rgba(79,140,255,0.15)">💬</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Saath Mein Baatein</div>
+        <div class="tl-text">Woh late-night conversations, woh random jokes, woh silence jo comfortable thi — sab kuch precious tha.</div>
+        <div class="tl-time" style="color:var(--blue)">The Best Times 🌙</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot-col">
+        <div class="tl-dot" style="background:rgba(255,179,71,0.15)">⚡</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Woh Galat Moment</div>
+        <div class="tl-text">Main behaved in a way I shouldn't have. Maine tumhari feelings ko properly consider nahi kiya. Mujhe maafi maangni chahiye thi — pehle.</div>
+        <div class="tl-time" style="color:var(--amber)">My Mistake 😔</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot-col">
+        <div class="tl-dot" style="background:rgba(162,89,255,0.15)">🔍</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Realize Hua</div>
+        <div class="tl-text">Jab tum nahi the — tab samjha. Tumhari presence kitni matter karti hai mere liye. Ek khalaapan sa tha.</div>
+        <div class="tl-time" style="color:var(--purple)">The Realization 💡</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot-col">
+        <div class="tl-dot" style="background:rgba(0,229,196,0.15)">🌱</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Ab Yahan Hoon</div>
+        <div class="tl-text">Sachchi maafi ke saath. Sudhaarne ki koshish ke saath. Aur ek promise ke saath — dobara nahi.</div>
+        <div class="tl-time" style="color:var(--teal)">Right Now 🌿</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px mt20 card card-amber">
+    <span class="section-tag tag-amber">● Ek Baat</span>
+    <p class="body mt8">"Jo bhi hua — usse zyada important yeh hai ki tum ho. Aur main tumhare bina sab kuch miss karta hoon." 🌼</p>
+  </div>
+
+  <div class="px mt20 btn-row">
+    <button class="btn btn-ghost" onclick="showPage(1)">← Back</button>
+    <button class="btn btn-teal" onclick="showPage(3)">Next →</button>
+  </div>
+  <div style="height:30px;"></div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE 4 — PROMISES
+══════════════════════════════ -->
+<div class="page" id="p4">
+  <div class="topbar px">
+    <a class="brand-tag" href="https://t.me/KISHAR05" target="_blank">KISHAR CODEX</a>
+    <span class="step-badge">4 / 6</span>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-purple">● My Promises</span>
+    <h1 class="h1 mt8">Mere<br><em style="color:var(--purple)">Waade</em></h1>
+    <p class="body mt8">Yeh sirf words nahi hain — yeh commitments hain. Tick karo jinpe tumhein yakeen ho:</p>
+  </div>
+
+  <div class="px mt16 checklist" id="checklist">
+    <div class="check-row"><div class="check-box" style="border-color:var(--pink)" onclick="toggleCheck(this,'var(--pink)')">✓</div><span>Tumhari feelings ko pehle sunuunga — fir respond karunga</span></div>
+    <div class="check-row"><div class="check-box" style="border-color:var(--blue)" onclick="toggleCheck(this,'var(--blue)')">✓</div><span>Koi bhi important decision bina tumse pooche nahi lunga</span></div>
+    <div class="check-row"><div class="check-box" style="border-color:var(--teal)" onclick="toggleCheck(this,'var(--teal)')">✓</div><span>Jab tumhein zaroorat ho — hamesha wahan rahunga</span></div>
+    <div class="check-row"><div class="check-box" style="border-color:var(--amber)" onclick="toggleCheck(this,'var(--amber)')">✓</div><span>Apni anger ko better manage karunga</span></div>
+    <div class="check-row"><div class="check-box" style="border-color:var(--purple)" onclick="toggleCheck(this,'var(--purple)')">✓</div><span>Tumhare time aur trust ki value karunga</span></div>
+    <div class="check-row"><div class="check-box" style="border-color:var(--green)" onclick="toggleCheck(this,'var(--green)')">✓</div><span>Chhoti chhoti khushiyon mein saath rahunga</span></div>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-amber">● Reason To Fix This</span>
+    <div class="mt12 promise-list">
+      <div class="promise-item">
+        <div class="promise-icon">🧩</div>
+        <div class="promise-text">
+          <div class="promise-title">Tum Incomplete Karte Ho Mujhe</div>
+          <div class="promise-desc">Jab tum nahi hote, duniya thodi adhuri lagti hai. Literally.</div>
+        </div>
+      </div>
+      <div class="promise-item">
+        <div class="promise-icon">🔥</div>
+        <div class="promise-text">
+          <div class="promise-title">Jo Rishta Hai — Woh Rare Hai</div>
+          <div class="promise-desc">Itna comfortable, itna real — yeh sab barbaad karna nahi chahta apni galti se.</div>
+        </div>
+      </div>
+      <div class="promise-item">
+        <div class="promise-icon">🌅</div>
+        <div class="promise-text">
+          <div class="promise-title">Ek Naye Chapter Ki Shuruaat</div>
+          <div class="promise-desc">Yeh page ek ending nahi, ek fresh start hai. Ek better version ke saath.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px mt20 btn-row">
+    <button class="btn btn-ghost" onclick="showPage(2)">← Back</button>
+    <button class="btn btn-purple" onclick="showPage(4)">Next →</button>
+  </div>
+  <div style="height:30px;"></div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE 5 — MOOD + REACT
+══════════════════════════════ -->
+<div class="page" id="p5">
+  <div class="topbar px">
+    <a class="brand-tag" href="https://t.me/KISHAR05" target="_blank">KISHAR CODEX</a>
+    <span class="step-badge">5 / 6</span>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-green">● Your Turn</span>
+    <h1 class="h1 mt8">Tumhara<br><em style="color:var(--green)">Jawaab?</em></h1>
+    <p class="body mt8">Ab tumhari baari. Abhi tumhein kaisa lag raha hai — honestly batao:</p>
+  </div>
+
+  <div class="px mt16">
+    <div class="mood-meter">
+      <div class="mood-step" onclick="pickMood(this,'😤','Gussa aaya')">😤</div>
+      <div class="mood-step" onclick="pickMood(this,'😢','Dil dukha')">😢</div>
+      <div class="mood-step" onclick="pickMood(this,'😐','Theek hoon')">😐</div>
+      <div class="mood-step" onclick="pickMood(this,'🙂','Thoda better')">🙂</div>
+      <div class="mood-step" onclick="pickMood(this,'❤️','Maaf kiya')">❤️</div>
+    </div>
+    <div class="mood-label" id="mood-label">Tap karo apna mood ☝️</div>
+  </div>
+
+  <div class="px mt20">
+    <span class="section-tag tag-pink">● Things I Love About You</span>
+    <div class="mt12 card card-pink">
+      <div class="prog-list">
+        <div class="prog-item">
+          <div class="prog-header"><span class="prog-label">Teri Smile ✨</span><span class="prog-pct" style="color:var(--pink)">💯</span></div>
+          <div class="prog-track"><div class="prog-fill" style="background:linear-gradient(90deg,var(--pink),var(--purple))" data-w="100"></div></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-header"><span class="prog-label">Tera Dil 🤍</span><span class="prog-pct" style="color:var(--blue)">∞</span></div>
+          <div class="prog-track"><div class="prog-fill" style="background:linear-gradient(90deg,var(--blue),var(--teal))" data-w="95"></div></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-header"><span class="prog-label">Teri Strength 💪</span><span class="prog-pct" style="color:var(--amber)">99%</span></div>
+          <div class="prog-track"><div class="prog-fill" style="background:linear-gradient(90deg,var(--amber),var(--green))" data-w="99"></div></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-header"><span class="prog-label">Teri Presence 🌸</span><span class="prog-pct" style="color:var(--teal)">Unmeasurable</span></div>
+          <div class="prog-track"><div class="prog-fill" style="background:linear-gradient(90deg,var(--teal),var(--blue))" data-w="100"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px mt20">
+    <div class="card card-teal">
+      <span class="section-tag tag-teal">● Heart Monitor 💓</span>
+      <p class="body mt4" style="font-size:11px;">Mera dil teri yaad mein:</p>
+      <svg class="heartrate mt8" id="hrSvg" viewBox="0 0 340 50">
+        <polyline id="hrLine" points="" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="px mt20 btn-row">
+    <button class="btn btn-ghost" onclick="showPage(3)">← Back</button>
+    <button class="btn btn-green" onclick="showPage(5)">Finish 💗</button>
+  </div>
+  <div style="height:30px;"></div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE 6 — FINAL
+══════════════════════════════ -->
+<div class="page" id="p6">
+  <div class="topbar px">
+    <a class="brand-tag" href="https://t.me/KISHAR05" target="_blank">KISHAR CODEX</a>
+    <span class="step-badge">6 / 6 ✓</span>
+  </div>
+
+  <div class="px mt20 center">
+    <span style="font-size:72px;display:block;animation:heroPulse 1.5s ease-in-out infinite;">🐶🤍</span>
+    <span class="section-tag tag-pink mt12" style="margin-top:12px;">● Always Yours</span>
+    <h1 class="h1 mt12" style="color:var(--white)">Shukriya,<br><em style="color:var(--pink)">Please Maaf Karo</em></h1>
+    <p class="body mt12">Tum mere liye sirf ek insaan nahi — tum meri khushi ho, meri calm ho, meri wajah ho. 🌸</p>
+  </div>
+
+  <div class="px mt20 stat-grid">
+    <div class="stat-card" style="border-color:rgba(255,61,139,0.3);background:rgba(255,61,139,0.08)">
+      <span class="stat-label">My Heart</span>
+      <span class="stat-value" style="color:var(--pink)">💗</span>
+      <span class="stat-sub">Always for you</span>
+    </div>
+    <div class="stat-card" style="border-color:rgba(0,229,196,0.3);background:rgba(0,229,196,0.08)">
+      <span class="stat-label">Promise</span>
+      <span class="stat-value" style="color:var(--teal)">✓✓✓</span>
+      <span class="stat-sub">Never again</span>
+    </div>
+  </div>
+
+  <div class="px mt16">
+    <div class="card card-purple">
+      <span class="section-tag tag-purple">● Final Note</span>
+      <blockquote class="quote-card mt8" style="border-color:var(--purple);background:transparent;padding:0;">
+        "Galtiyan insaan karta hai — par unhe sudharna hi asli pyaar hai. Tum deserve karte ho ek aisa insaan jo tumhare liye hamesha better banne ki koshish kare. Woh insaan main hoon."
+        <div class="quote-attr">— Dil ki gehraai se 💜</div>
+      </blockquote>
+    </div>
+  </div>
+
+  <div class="px mt16">
+    <div class="card" style="background:rgba(255,61,139,0.06);border-color:rgba(255,61,139,0.2);">
+      <p class="body" style="text-align:center;font-size:14px;color:var(--white);line-height:1.8;">
+        "Tum bina reasons ke beautiful ho 🌸<br>
+        Tum bina reasons ke important ho 💙<br>
+        Tum bina reasons ke loved ho 💗"
+      </p>
+    </div>
+  </div>
+
+  <div class="px mt20">
+    <button class="btn btn-pink btn-full" onclick="triggerConfetti(); notify('💗 Shukriya — yeh sab sirf tumhare liye tha!')">Accept My Sorry 💗</button>
+  </div>
+  <div class="px mt12">
+    <button class="btn btn-ghost btn-full" onclick="showPage(0)">Start Again 🔄</button>
+  </div>
+  <div style="height:40px;"></div>
+</div>
+
+<script>
+/* ── BACKGROUND CANVAS ── */
+const cv = document.getElementById('bg-canvas');
+const cx = cv.getContext('2d');
+let cW, cH;
+function resizeCanvas() { cW = cv.width = window.innerWidth; cH = cv.height = window.innerHeight; }
+resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+const particles = Array.from({length:70},()=>({x:Math.random()*2000,y:Math.random()*2000,r:Math.random()*1.2+0.3,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:Math.random()*Math.PI*2}));
+function drawBg(){
+  cx.clearRect(0,0,cW,cH);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.a+=0.007;
+    if(p.x<0)p.x=cW; if(p.x>cW)p.x=0;
+    if(p.y<0)p.y=cH; if(p.y>cH)p.y=0;
+    cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    cx.fillStyle=`rgba(200,150,200,${0.2+0.2*Math.sin(p.a)})`; cx.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+/* ── FLOATING BITS ── */
+const floatLayer = document.getElementById('float-layer');
+const bits = ['💗','🌸','✨','💫','🌷','💙','🌿','💜','⭐','🎀'];
+function spawnBit(){
+  const el = document.createElement('span');
+  el.className = 'float-bit';
+  el.textContent = bits[Math.floor(Math.random()*bits.length)];
+  el.style.left = Math.random()*93+'%';
+  const d = 6+Math.random()*7;
+  el.style.animationDuration = d+'s';
+  el.style.animationDelay = Math.random()+'s';
+  el.style.fontSize = (14+Math.random()*14)+'px';
+  floatLayer.appendChild(el);
+  setTimeout(()=>el.remove(),(d+2)*1000);
+}
+setInterval(spawnBit, 600);
+
+/* ── PAGE NAVIGATION ── */
+let currentPage = 0;
+const pages = document.querySelectorAll('.page');
+function showPage(idx){
+  const cur = pages[currentPage];
+  cur.classList.add('out');
+  cur.classList.remove('active');
+  setTimeout(()=>{ cur.classList.remove('out'); },350);
+  currentPage = idx;
+  const next = pages[idx];
+  next.scrollTop = 0;
+  next.classList.add('active');
+  // Animate progress bars on page enter
+  setTimeout(animateProgs, 400);
+  // Draw heart rate on page 5
+  if(idx===4) setTimeout(drawHeartRate,500);
+}
+
+/* ── PROGRESS BARS ── */
+function animateProgs(){
+  document.querySelectorAll('.page.active .prog-fill').forEach(el=>{
+    const w = el.dataset.w || 0;
+    el.style.width = w+'%';
+  });
+}
+
+/* ── CHECKLIST ── */
+function toggleCheck(box, color){
+  box.classList.toggle('done');
+  if(box.classList.contains('done')){
+    box.style.background = color;
+    box.style.borderColor = 'transparent';
+    box.textContent = '✓';
+    spawnBit();
+    notify('Promise noted! 🌸');
+  } else {
+    box.style.background = 'transparent';
+    box.style.borderColor = color.replace('var(','').replace(')','');
+    box.style.borderColor = color;
+    box.textContent = '✓';
+  }
+}
+
+/* ── MOOD PICKER ── */
+function pickMood(el, emoji, label){
+  document.querySelectorAll('.mood-step').forEach(s=>s.classList.remove('picked'));
+  el.classList.add('picked');
+  document.getElementById('mood-label').textContent = label+' '+emoji;
+  notify(emoji+' '+label+' — thank you for telling me 💗');
+  if(emoji==='❤️'){ setTimeout(triggerConfetti,300); }
+}
+
+/* ── HEART RATE SVG ── */
+function drawHeartRate(){
+  const svg = document.getElementById('hrSvg');
+  const line = document.getElementById('hrLine');
+  if(!line) return;
+  const W=340, H=50, mid=H/2;
+  const pattern = [0,0,0,-20,35,-15,0,0,0,0,-5,10,-3,0,0,0];
+  let pts=[], x=0;
+  for(let rep=0;rep<3;rep++){
+    pattern.forEach(v=>{ pts.push(`${x},${mid+v}`); x+=W/(pattern.length*3); });
+  }
+  line.setAttribute('points',pts.join(' '));
+  // Animate
+  const len = line.getTotalLength ? line.getTotalLength() : 1000;
+  line.style.strokeDasharray = len;
+  line.style.strokeDashoffset = len;
+  line.style.transition = 'stroke-dashoffset 2s ease';
+  requestAnimationFrame(()=>{ line.style.strokeDashoffset = 0; });
+}
+
+/* ── NOTIFICATION ── */
+const notif = document.getElementById('notif');
+let notifTimer;
+function notify(msg){
+  notif.textContent = msg;
+  notif.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(()=>notif.classList.remove('show'),2500);
+}
+
+/* ── CONFETTI ── */
+const confColors=['#ff3d8b','#4f8cff','#00e5c4','#ffb347','#a259ff','#3ddc84','#ff6fa3','#ffd700'];
+function triggerConfetti(){
+  for(let i=0;i<50;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='confetti-piece';
+      c.style.left=Math.random()*100+'vw';
+      c.style.background=confColors[Math.floor(Math.random()*confColors.length)];
+      c.style.borderRadius=Math.random()>0.5?'50%':'2px';
+      const d=1.5+Math.random()*2;
+      c.style.animationDuration=d+'s';
+      c.style.animationDelay=(Math.random()*.5)+'s';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),(d+1)*1000);
+    },i*40);
+  }
+}
+
+/* ── INIT ── */
+animateProgs();
+</script>
+</body>
+</html>
